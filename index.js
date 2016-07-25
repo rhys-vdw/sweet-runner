@@ -98,22 +98,22 @@ board.on("ready", function() {
   lcd.useChar('descchart6');
 
 
-  const manSprite = 'runninga';
+  const manSprite = ':runninga:';
 
   // Add block frames into an array. Each element is the top and bottom sprite
   // (`null` when none should be shown).
   const blockFrames = [
-    ['ascchart2', null],
-    ['ascchart4', null],
-    ['ascchart6', null],
-    ['fullprogress', null],
-    ['descchart6', 'ascchart2'],
-    ['descchart4', 'ascchart4'],
-    ['descchart2', 'ascchart6'],
-    [null, 'fullprogress'],
-    [null, 'descchart6'],
-    [null, 'descchart4'],
-    [null, 'descchart2'],
+    [':ascchart2:', ' '],
+    [':ascchart4:', ' '],
+    [':ascchart6:', ' '],
+    [':fullprogress:', ' '],
+    [':descchart6:', ':ascchart2:'],
+    [':descchart4:', ':ascchart4:'],
+    [':descchart2:', ':ascchart6:'],
+    [' ', ':fullprogress:'],
+    [' ', ':descchart6:'],
+    [' ', ':descchart4:'],
+    [' ', ':descchart2:'],
   ];
 
   let frame = 0;
@@ -125,7 +125,7 @@ board.on("ready", function() {
   function drawSprite(row, column, sprite) {
     if (sprite != null) {
       lcd.cursor(row, column);
-      lcd.print(`:${sprite}:`);
+      lcd.print(sprite);
     }
   }
 
@@ -216,13 +216,11 @@ board.on("ready", function() {
       }
     }
 
-    lcd.clear();
-
-    drawSprite(1, nextPosition, manSprite);
-
     _.each(blocks, (block, col) => {
       if (block != null) {
-        block.frameCount += 1;
+    drawSprite(1, nextPosition, manSprite);
+
+        block.frameCount++;
 
         if (block.frameCount > 4 && block.frameCount < 11 && nextPosition === col) {
           isGameOver = true;
@@ -245,7 +243,7 @@ board.on("ready", function() {
 
       playTune(deathTune);
 
-      lcd.clear()
+      lcd
         .cursor(0, 0).print('    YOU DIED   ')
         .cursor(1, 0).print(`SCORE: ${leftPad(frameNumber, 9)}`);
 
