@@ -10,7 +10,68 @@ const columnCount = 16;
 
 const board = new five.Board();
 
+const staccato = (item) => {
+  const note = item[0];
+  const duration = item[1];
+  return [[note, duration - 0.1], [null, 0.1]];
+};
+
+const themeTune = {
+  song: _.flatMap([
+    ['E4', 3/4],
+    ['B5', 1/4],
+    ['E4', 1/4],
+    ['B5', 1/4],
+    ['E4', 1/4],
+    ['B4', 1/4],
+    ['E4', 1/4],
+    ['B4', 1/4],
+    [null, 1/4]
+  ], staccato),
+  tempo: 80
+};
+
+const awakeTune = {
+  song: _.flatMap([
+    ['E4', 1/4],
+    ['G4', 1/4],
+    ['C5', 1/4],
+    [null, 1/4]
+  ], staccato),
+  tempo: 80
+};
+
+const deathTune = {
+  song: _.flatMap([
+    [null, 2/4],
+    ['C5', 1/4],
+    ['G4', 1/4],
+    ['E4', 1/4],
+    [null, 1/4]
+  ], staccato),
+  tempo: 80
+};
+
 board.on("ready", function() {
+
+  // Create a standard `piezo` instance on pin 3
+  var piezo = new five.Piezo(3);
+
+  // Clear buffer? Sometimes the piezo makes unwanted sounds.
+  piezo.stop();
+
+  board.on('exit', () => {
+
+    // Prevent awful high pitched whine.
+    piezo.stop();
+  });
+
+  // Clone tune objects to avoid bug:
+  // https://github.com/rwaldron/johnny-five/issues/1186
+  //
+  function playTune(tune) {
+    piezo.play(_.cloneDeep(tune));
+  }
 
   // Create a new `potentiometer` hardware instance.
   const potentiometer = new five.Sensor({ pin: "A2", loopDuration });
@@ -113,6 +174,8 @@ board.on("ready", function() {
 
   function startGame(callback) {
 
+    playTune(themeTune);
+
     lcd.clear()
       .print("==SWEET RUNNER==")
       .cursor(1, 0)
@@ -123,6 +186,7 @@ board.on("ready", function() {
       const to = getInput();
       const change = Math.abs(from - to);
       if (change > 0.2) {
+        playTune(awakeTune);
         lcd.clear();
         isRunning = true;
         endLoop();
@@ -178,6 +242,8 @@ board.on("ready", function() {
 
     if (isGameOver) {
       isRunning = false;
+
+      playTune(deathTune);
 
       lcd.clear()
         .cursor(0, 0).print('    YOU DIED   ')
